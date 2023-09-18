@@ -1,4 +1,4 @@
-import { signup, login, viewUsers, forgotPassword, resetPassword } from "../controllers/userController.js";
+import { signup, login, viewUsers, forgotPassword, resetPassword, uploadImage } from "../controllers/userController.js";
 import express from "express"
 import { validate } from "../middlewares/validator.js";
 import { userLoginValidate, userValidate } from "../middlewares/userValidate.js";
@@ -10,5 +10,6 @@ userRoutes.post("/login", validate(userLoginValidate), login);
 userRoutes.get("/viewusers", viewUsers);
 userRoutes.post("/forgotpassword", forgotPassword);
 userRoutes.post("/resetpassword", resetPassword);
+userRoutes.post("/upload", uploadImage)
 
 export { userRoutes }

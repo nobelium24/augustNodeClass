@@ -4,6 +4,7 @@ import { generateUserToken, verifyUserToken } from "../utilities/userToken.js";
 import { forgotPasswordMail, sendMail } from "../utilities/mailer.js";
 import { generateCode } from "../utilities/codeGenerator.js";
 import { forgotPasswordModel } from "../models/forgotPasswordModel.js";
+import { cloudinary } from "../utilities/cloudinaryConfig.js";
 
 const signup = async (req, res, next) => {
     try {
@@ -76,29 +77,41 @@ const forgotPassword = async (req, res, next) => {
         }
         const firstName = user.firstName
         await forgotPasswordMail(email, firstName, OTP)
-        res.status(200).send({message:"Check your mail for OTP", status: true})
+        res.status(200).send({ message: "Check your mail for OTP", status: true })
     } catch (error) {
         next(error)
     }
 }
 
-const resetPassword = async (req,res, next ) => {
+const resetPassword = async (req, res, next) => {
     try {
-        const {OTP, email, password} = req.body
-        
-        const findOTP = await forgotPasswordModel.findOne({email:email, OTP:OTP})
-        if(!findOTP){
-            return res.status(404).send({message:"OTP not found. Try again"})
+        const { OTP, email, password } = req.body
+
+        const findOTP = await forgotPasswordModel.findOne({ email: email, OTP: OTP })
+        if (!findOTP) {
+            return res.status(404).send({ message: "OTP not found. Try again" })
         }
         let hashedPassword = await bcryptjs.hash(password, 10);
-        const update = await userModel.updateOne({email:email}, {$set:{password:hashedPassword}})
-        if(!update.acknowledged){
-            return res.status(500).send({message:"Error updating password. Try again"})
+        const update = await userModel.updateOne({ email: email }, { $set: { password: hashedPassword } })
+        if (!update.acknowledged) {
+            return res.status(500).send({ message: "Error updating password. Try again" })
         }
-        res.status(200).send({message:"Password updated successfully", status: true})
+        res.status(200).send({ message: "Password updated successfully", status: true })
     } catch (error) {
         next(error)
     }
 }
 
-export { signup, login, viewUsers, forgotPassword, resetPassword }
+const uploadImage = async (req, res, next) => {
+    try {
+        const {data} = req.body
+        const result = await cloudinary.uploader.upload(data);
+        console.log(result)
+        const {secure_url, public_id} = result;
+        res.status(201).send({message:"Image uploaded successfully", status:true, secure_url, public_id})
+    } catch (error) {
+        next(error)
+    }
+}
+
+export { signup, login, viewUsers, forgotPassword, resetPassword, uploadImage }
