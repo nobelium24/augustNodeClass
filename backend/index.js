@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDB } from "./database/connectDB.js";
 import { userRoutes } from "./routes/userRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import * as socketIo from "socket.io";
 
 env.config();
 const app = express();
@@ -21,6 +22,29 @@ connectDB()
 app.use(errorHandler)
 
 
-app.listen(7770, ()=>{
+const server = app.listen(7770, ()=>{
     console.log("App is listening at port 7770")
 })
+
+console.log(server)
+
+let io = new socketIo.Server(server, {
+    cors:{
+        origin:"*"
+    }
+});
+
+
+io.on("connection", (socket)=>{
+    console.log("New user connected");
+    console.log(`User ${socket.id} is connected`);
+
+    socket.on("message", (data)=>{
+        console.log(data, socket.id);
+        io.emit("broadcast", data);
+    })
+
+    socket.on("disconnect", ()=>{
+        console.log(`User ${socket.id} has disconnected`)
+    })
+}) 

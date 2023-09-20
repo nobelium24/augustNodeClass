@@ -25,7 +25,7 @@ const Dashboard = () => {
       console.log(res.data)
       setImgUrl(res.data.secure_url)
     }).catch((err)=>{
-      console.log(err)
+      console.log(err)    
     })
   }
 
